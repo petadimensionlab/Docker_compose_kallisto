@@ -1,0 +1,4 @@
+Install genome.fa(Transcript sequences )
+https://www.gencodegenes.org/human/
+Make kallisto index
+docker run --rm -v /your_localdir:/tmp/wk -w=/tmp/wk quay.io/biocontainers/kallisto:0.46.1--h4f7b962_0 kallisto index -i kallisto_idx/SPICEIS_index kallisto_idx/SPICEIS.fa

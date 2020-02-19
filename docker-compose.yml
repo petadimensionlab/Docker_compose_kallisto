@@ -1,0 +1,42 @@
+##env in .env file
+## Install genome.fa(Transcript sequences )
+# https://www.gencodegenes.org/human/
+## Make kallisto index
+# docker run --rm -v /your_localdir:/tmp/wk -w=/tmp/wk quay.io/biocontainers/kallisto:0.46.1--h4f7b962_0 kallisto index -i kallisto_idx/SPICEIS_index kallisto_idx/SPICEIS.fa
+## Download SRA
+# docker run --rm -v /Users/petadimensionlab/Downloads/test_docker/:/root/ncbi/public/sra inutano/sra-toolkit prefetch SRR***
+
+version: "3"
+services:
+  parallel-fastq:
+    image: quay.io/biocontainers/parallel-fastq-dump:${VER_1}
+    container_name: parallel-fastq
+    tty: true
+    volumes:
+      - ${DIR}:/tmp/wk
+    working_dir: /tmp/wk
+    command: >
+      bash -c "parallel-fastq-dump --sra-id input/${ID}.sra --threads ${THREADS} --split-files --gzip &&
+      mkdir -p output/${ID} &&
+      mv *.fastq.gz output/${ID}/"
+
+  fastp:
+    image: quay.io/biocontainers/fastp:${VER_2}
+    container_name: fastp
+    tty: true
+    volumes:
+      - ${DIR}:/tmp/wk
+    working_dir: /tmp/wk
+    command: >
+      bash -c "sh wait-for-it.sh output/${ID}/${ID}_1.fastq.gz fastp -w ${THREADS} -h output/${ID}/${ID}.html -j output/${ID}/${ID}.json -i output/${ID}/${ID}_1.fastq.gz -I output/${ID}/${ID}_2.fastq.gz -o output/${ID}/${ID}_trim_paired_1.fastq.gz -O output/${ID}/${ID}_trim_paired_2.fastq.gz &&
+      mkdir k_results "
+      
+  kallisto:
+    image: quay.io/biocontainers/kallisto:${VER_3}
+    container_name: kallisto
+    tty: true
+    volumes:
+      - ${DIR}:/tmp/wk
+    working_dir: /tmp/wk
+    command: >
+      bash -c "sh wait-for-it.sh output/${ID}/${ID}.html kallisto quant -t ${THREADS} -i kallisto_idx/${SPECIES}_index -o k_results/${ID} -b 100 output/${ID}/${ID}_trim_paired_1.fastq.gz output/${ID}/${ID}_trim_paired_2.fastq.gz"
