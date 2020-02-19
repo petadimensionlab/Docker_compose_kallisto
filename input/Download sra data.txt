@@ -2,4 +2,4 @@ Download sra data.
 
 Run this docker command.
 
-docker run --rm -v /yourlocal_dir/Docker_compose_STAR/input:/root/ncbi/public/sra inutano/sra-toolkit prefetch SRR493366
+docker run --rm -v /yourlocal_dir/Docker_compose_kallisto/input:/root/ncbi/public/sra inutano/sra-toolkit prefetch SRR493366
